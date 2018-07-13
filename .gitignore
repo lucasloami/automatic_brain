@@ -1,6 +1,8 @@
 
 # Created by https://www.gitignore.io/api/python,jupyternotebook
 
+
+
 ### JupyterNotebook ###
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
@@ -8,6 +10,9 @@
 # Remove previous ipynb_checkpoints
 #   git rm -r .ipynb_checkpoints/
 #
+
+# Zip files
+.zip
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
