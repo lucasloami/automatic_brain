@@ -12,7 +12,7 @@
 #
 
 # Zip files
-.zip
+*.zip
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
