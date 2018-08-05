@@ -442,7 +442,7 @@ X_counts_bigram = count_vec_ngram.fit_transform(X)
 
 
 ```python
-tf = TfidfTransformer(use_idf=False)
+tf = TfidfTransformer(use_idf=False, norm="l1")
 X_freq = tf.fit_transform(X_counts)
 ```
 
@@ -450,7 +450,7 @@ X_freq = tf.fit_transform(X_counts)
 
 
 ```python
-tf = TfidfTransformer()
+tf = TfidfTransformer(norm="l1")
 X_tfidf = tf.fit_transform(X_counts)
 ```
 
@@ -546,16 +546,16 @@ print("-----------------------------------------------------")
 ```
 
     Metricas usando MNB
-    Acuracia de counts = 0.895400593472
-    Acuracia de bigram = 0.825173095945
-    Acuracia de freq = 0.816023738872
-    Acuracia de tfidf = 0.865727002967
+    Acuracia de counts = 0.888724035608
+    Acuracia de bigram = 0.819485657765
+    Acuracia de freq = 0.469337289812
+    Acuracia de tfidf = 0.604846686449
     -----------------------------------------------------
     Metricas usando SVM
-    Acuracia de counts = 0.890702274975
-    Acuracia de bigram = 0.817260138477
-    Acuracia de freq = 0.905539070227
-    Acuracia de tfidf = 0.916172106825
+    Acuracia de counts = 0.884025717112
+    Acuracia de bigram = 0.812809099901
+    Acuracia de freq = 0.900346191889
+    Acuracia de tfidf = 0.915430267062
     -----------------------------------------------------
 
 
@@ -571,17 +571,17 @@ A tabela abaixo apresenta a acurácia dos modelos usando features sem a aplicaç
   </tr>
   <tr>
     <td>Multinomial Naive Bayes</td>
-    <td>0.88</td>
+    <td>0.90</td>
     <td>0.82</td>
-    <td>0.82</td>
-    <td>0.86</td>
+    <td>0.50</td>
+    <td>0.61</td>
   </tr>
   <tr>
     <td>Support Vector Machines</td>
     <td>0.89</td>
     <td>0.81</td>
-    <td>0.90</td>
     <td>0.91</td>
+    <td>0.92</td>
   </tr>
 </table>
 
@@ -603,7 +603,7 @@ acc = accuracy_score(y_final_test, svm_y_pred)
 print("Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = {}".format(acc))
 ```
 
-    Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = 0.918241085684
+    Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = 0.920369877594
 
 
 Vemos, portanto, que a acurácia do modelo na base de testes é semelhante ao que obtivemos na fase de treino e seleção do algoritmo, 92%. 
@@ -623,7 +623,7 @@ AS seções anteriores explicaram os principais conceitos utilizados nesse proje
 
 
 ```python
-tf = TfidfTransformer(use_idf=False)
+tf = TfidfTransformer(use_idf=False, norm="l1")
 X_freq = tf.fit_transform(X_counts_bigram)
 ```
 
@@ -631,7 +631,7 @@ X_freq = tf.fit_transform(X_counts_bigram)
 
 
 ```python
-tf_idf = TfidfTransformer()
+tf_idf = TfidfTransformer(norm="l1")
 X_tfidf = tf_idf.fit_transform(X_counts_bigram)
 ```
 
@@ -679,12 +679,12 @@ print("-----------------------------------------------------")
 ```
 
     Metricas usando MNB
-    Acuracia de freq = 0.679525222552
-    Acuracia de tfidf = 0.71587537092
+    Acuracia de freq = 0.297725024728
+    Acuracia de tfidf = 0.305390702275
     -----------------------------------------------------
     Metricas usando SVM
-    Acuracia de freq = 0.810830860534
-    Acuracia de tfidf = 0.82962413452
+    Acuracia de freq = 0.811819980218
+    Acuracia de tfidf = 0.825914935707
     -----------------------------------------------------
 
 
@@ -696,18 +696,36 @@ print("-----------------------------------------------------")
   </tr>
   <tr>
     <td>Multinomial Naive Bayes</td>
-    <td>0.68</td>
-    <td>0.72</td>
+    <td>0.29</td>
+    <td>0.24</td>
   </tr>
   <tr>
     <td>Support Vector Machines</td>
-    <td>0.81</td>
-    <td>0.83</td>
+    <td>0.80</td>
+    <td>0.82</td>
   </tr>
 </table>
 
 
-A partir da tabela acima, é possível concluir que o uso de bigramas para esse desafio não melhora a acurácia do modelo. 
+A partir da tabela acima, é possível concluir que o uso de bigramas para esse desafio não melhora a acurácia do modelo. O classificador com melhor resultado será utilizado para classificar os resultados do dataset de testes. Os resultados são apresentados abaixo.
+
+
+```python
+X_final_test_counts = count_vec_ngram.transform(X_final_test)
+```
+
+
+```python
+X_final_test_tfidf = tf_idf.transform(X_final_test_counts)
+svm_y_pred = clf_tfidf.predict(X_final_test_tfidf)
+
+acc = accuracy_score(y_final_test, svm_y_pred)
+
+print("Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = {}".format(acc))
+```
+
+    Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = 0.829563597658
+
 
 ### Aplicando cross validation
 
@@ -843,7 +861,7 @@ A partir da tabela acima, é possível concluir usar Cross Validation com SVM ge
 Quando trabalhamos em tasks de NLP, lidamos com palavras que estão conjugadas em diferentes tempos verbais, graus (ex: advérbios no superlativo), gênero e número, mas que essencialmente continuam representando o mesmo conceito. Se observarmos os trabalhos feitos anteriormente nesse projeto, nossas _features_ não levam em consideração esse fator, o que pode acarretar na existência de _features_ que representam o mesmo conceito desnecessariamente. Para lidar com isso, precisamos normalizar as palavras. Em NLP, as duas principais formas de lidar com isso são:
 
 1. Stemming: processo de redução das palavras a sua base (`stem`). Em alguns lugares vocề encontrará que é o processo de remoção das flexões/derivações das palavras, mantendo apenas o seu radical (morfema básico que guarda o significado da mesma)
-2. Lemmatiztion: processo que deflexiona uma palavra a fim de obter o seu lema (forma canônica), que é a representação singular masculino para substantivos e adjetivos e infinitivo para verbos.
+2. Lemmatization: processo que deflexiona uma palavra a fim de obter o seu lema (forma canônica), que é a representação singular masculino para substantivos e adjetivos e infinitivo para verbos.
 
 O stemmer mais famoso é o de Porter, mas não entraremos em detalhes sobre o funcionamento do mesmo, apenas o aplicaremos no nosso projeto a fim de obter melhores resultados. 
 
@@ -859,7 +877,7 @@ def stemmed_words(doc):
     return (stemmer.stem(w) for w in analyzer(doc))
 ```
 
-#### WordCount
+#### WordCount (Unigram)
 
 
 ```python
@@ -867,11 +885,19 @@ stem_count_vec = CountVectorizer(analyzer=stemmed_words)
 X_counts = stem_count_vec.fit_transform(X)
 ```
 
+#### WordCount (Bigram)
+
+
+```python
+count_vec_ngram = CountVectorizer(ngram_range=(2, 2), analyzer=stemmed_words)
+X_counts_bigram = count_vec_ngram.fit_transform(X)
+```
+
 #### TF
 
 
 ```python
-tf = TfidfTransformer(use_idf=False)
+tf = TfidfTransformer(use_idf=False, norm="l1")
 X_freq = tf.fit_transform(X_counts)
 ```
 
@@ -879,7 +905,7 @@ X_freq = tf.fit_transform(X_counts)
 
 
 ```python
-tf_idf = TfidfTransformer()
+tf_idf = TfidfTransformer(norm="l1")
 X_tfidf = tf_idf.fit_transform(X_counts)
 ```
 
@@ -889,15 +915,18 @@ X_tfidf = tf_idf.fit_transform(X_counts)
 ```python
 # TRAIN TEST SPLIT
 X_train_counts, X_test_counts, y_train_counts, y_test_counts = train_test_split(X_counts, y, test_size=.2)
+X_train_bigram, X_test_bigram, y_train_bigram, y_test_bigram = train_test_split(X_counts_bigram, y, test_size=.2)
 X_train_freq, X_test_freq, y_train_freq, y_test_freq = train_test_split(X_freq, y, test_size=.2)
 X_train_tfidf, X_test_tfidf, y_train_tfidf, y_test_tfidf = train_test_split(X_tfidf, y, test_size=.2)
 
 # MULTINOMIAL NAIVE BAYES
 clf_counts = MultinomialNB().fit(X_train_counts, y_train_counts)
+clf_bigram = MultinomialNB().fit(X_train_bigram, y_train_bigram)
 clf_freq = MultinomialNB().fit(X_train_freq, y_train_freq)
 clf_tfidf = MultinomialNB().fit(X_train_tfidf, y_train_tfidf)
 
 y_mnb_pred_counts = clf_counts.predict(X_test_counts)
+y_mnb_pred_bigram = clf_bigram.predict(X_test_bigram)
 y_mnb_pred_freq = clf_freq.predict(X_test_freq)
 y_mnb_pred_tfidf = clf_tfidf.predict(X_test_tfidf)
 
@@ -907,59 +936,67 @@ param_grid = [
  ]
 svc = LinearSVC()
 clf_svm_counts = GridSearchCV(svc, param_grid).fit(X_train_counts, y_train_counts)
+clf_svm_bigram = GridSearchCV(svc, param_grid).fit(X_train_bigram, y_train_bigram)
 clf_svm_freq = GridSearchCV(svc, param_grid).fit(X_train_freq, y_train_freq)
 clf_svm_tfidf = GridSearchCV(svc, param_grid).fit(X_train_tfidf, y_train_tfidf)
 
 y_svm_pred_counts = clf_svm_counts.predict(X_test_counts)
+y_svm_pred_bigram = clf_svm_bigram.predict(X_test_bigram)
 y_svm_pred_freq = clf_svm_freq.predict(X_test_freq)
 y_svm_pred_tfidf = clf_svm_tfidf.predict(X_test_tfidf)
 
 acc_counts = accuracy_score(y_test_counts, y_mnb_pred_counts)
+acc_bigram = accuracy_score(y_test_counts, y_mnb_pred_bigram)
 acc_freq = accuracy_score(y_test_freq, y_mnb_pred_freq)
 acc_tfidf = accuracy_score(y_test_tfidf, y_mnb_pred_tfidf)
 
 print("Metricas usando MNB")
 print("Acuracia de counts = {}".format(acc_counts))
+print("Acuracia de bigram = {}".format(acc_bigram))
 print("Acuracia de freq = {}".format(acc_freq))
 print("Acuracia de tfidf = {}".format(acc_tfidf))
 print("-----------------------------------------------------")
 
 
 svm_acc_counts = accuracy_score(y_test_counts, y_svm_pred_counts)
+svm_acc_bigram = accuracy_score(y_test_counts, y_svm_pred_bigram)
 svm_acc_freq = accuracy_score(y_test_freq, y_svm_pred_freq)
 svm_acc_tfidf = accuracy_score(y_test_tfidf, y_svm_pred_tfidf)
 
 print("Metricas usando SVM")
 print("Acuracia de counts = {}".format(svm_acc_counts))
+print("Acuracia de bigram = {}".format(svm_acc_bigram))
 print("Acuracia de freq = {}".format(svm_acc_freq))
 print("Acuracia de tfidf = {}".format(svm_acc_tfidf))
 print("-----------------------------------------------------")
 ```
 
     Metricas usando MNB
-    Acuracia de counts = 0.895895153314
-    Acuracia de freq = 0.822205736894
-    Acuracia de tfidf = 0.865232443126
+    Acuracia de counts = 0.90900098912
+    Acuracia de bigram = 0.104846686449
+    Acuracia de freq = 0.534866468843
+    Acuracia de tfidf = 0.668397626113
     -----------------------------------------------------
     Metricas usando SVM
-    Acuracia de counts = 0.887240356083
-    Acuracia de freq = 0.905044510386
-    Acuracia de tfidf = 0.914935707221
+    Acuracia de counts = 0.898367952522
+    Acuracia de bigram = 0.105341246291
+    Acuracia de freq = 0.89762611276
+    Acuracia de tfidf = 0.917161226508
     -----------------------------------------------------
 
 
 <table>
   <tr>
     <th>Algoritmo / Feature</th>
-    <th>WordCount</th>
+    <th>Word count</th>
     <th>Term Frequency</th>
     <th>TF-IDF</th>
   </tr>
   <tr>
     <td>Multinomial Naive Bayes</td>
     <td>0.90</td>
-    <td>0.82</td>
-    <td>0.87</td>
+    <td>0.52</td>
+    <td>0.63</td>
   </tr>
   <tr>
     <td>Support Vector Machines</td>
@@ -968,6 +1005,26 @@ print("-----------------------------------------------------")
     <td>0.92</td>
   </tr>
 </table>
+
+A partir da tabela acima, o classificador com melhor resultado será utilizado para classificar os resultados do dataset de testes. Os resultados são apresentados abaixo.
+
+
+```python
+X_final_test_counts = stem_count_vec.transform(X_final_test)
+```
+
+
+```python
+X_final_test_tfidf = tf_idf.transform(X_final_test_counts)
+svm_y_pred = clf_svm_tfidf.predict(X_final_test_tfidf)
+
+acc = accuracy_score(y_final_test, svm_y_pred)
+
+print("Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = {}".format(acc))
+```
+
+    Acuracia do melhor classificador (SVM com Unigramas e TF-IDF) = 0.919638105375
+
 
 ## Referências
 
